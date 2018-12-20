@@ -1,0 +1,56 @@
+# Define input files
+InputFiles:
+
+  # A stranded bed file of target introns
+  TargetSpliceSites: "/home/bjf79/myhome_yang/MPEseq/NewTargets_eQTLs.bed"
+
+  # Reference genome to BLAST candidate primers. A BLAST database will be created (if not already in existence) with the name path/to/genome.fa[.nhr|.nin|.nsq|.fai]
+  GenomeFasta: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19.fasta"
+
+  # Candidate primers must be fully within an annotated exon downstream of the provided TargetSpliceSites 3'ss, regardless of the window size
+  # A stranded bed file
+  AnnotatedExons: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/gencode.v19.genes.v7.patched_contigs.exons.bed"
+
+  #if any empty string is provided, will skip filtering out repeat regions for potential priming sites
+  RepeatRegions: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19_Repeats.bed"
+
+  #if no RNA-seq data is provided, will penalize off-target blast-hits according equally, rather than weighting by prevalence in RNA-seq. Note that the bam file provided must have a SortOrder and contig names that match the provided GenomeFasta (chr10 != 10)
+  RNASeq: "/home/bjf79/myhome_yang/MPEseq/LCL_RNAseq/HG00117.1.M_111124_2_renamed.sorted.bam"
+
+# Prepend All output files with /my/path/to/output/files/
+OutputPrefix: "../SnakemakeDesignExtraEQTLPrimersOutput/"
+
+# Define some parameters
+Parameters:
+
+  # window size (bp) for potential primers downstream of 3'ss
+  WindowSize: 50
+
+  # Hard filters. Candidate Primers that do not conform to Min or Max parameters are discarded, even if that means discarding all potential primers for a target
+
+  # Primer length
+  MinPrimerLength: 24
+  MaxPrimerLength: 32
+
+  # Candidate primers that are over this percent within a RepeatRegion will be discarded
+  RepeatRegionMaxPercentOverlap: 50
+
+  # All candidate primers outside this tm range as calculated by oligotm will be discarded
+  TmFilter:
+    MinTm: 55
+    MaxTm: 66
+    OptimalTm: 59
+    oligotm_parameters: "-n 1 -mv 75 -dv 3 -d 10 -tp 1 -sc 1"
+
+  # Candidate primers who are predicted to bind at less than MinPercentOnTargetEstimate are discarded. The PercentOnTargetEstimate is based on number of BLAST hits, with BLAST hits weighted by their abundance in RNA-seq and predicted Tm with mismatches.
+  MinPercentOnTargetEstimate: 50
+
+  # Sometimes no candidate primers for a target pass the above critera, but more often many candidates pass all hard filters. To pick the best primer, each candidate primer is assigned a score from 0->100 (bad->good). The primer with the best score for each target is output.
+  #
+  # The score is made up of three percent weighted components:
+  # Tm_weight: Perfect score (1) is PrimerTm = OptimalTm. A score of 0 for this is anything equal to or outside the MinTm or MaxTm, with linear relationship between 0 and 1
+  Tm_weight: 0.3
+  # PercentOnTargetEstimate_weight: Perfect Score (1) means that the PercentOnTargetEstimate 100%. The PercentOnTargetEstimate is an in silico estimate based on number of BLAST hits, with BLAST hits weighted by their abundance in RNA-seq and predicted Tm with mismatches.
+  PercentOnTargetEstimate_weight: 0.5
+  # GCcontent_weight: Score of 1 is 50% GC-content, Score of 0 is >=80% GC content or <=20% GC Content.
+  GCcontent_weight: 0.2
