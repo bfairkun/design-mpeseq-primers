@@ -1,0 +1,10 @@
+*
+!cluster-config.json
+!config.yaml
+!dag.svg
+!environment.yaml
+!scripts
+!Snakefile
+!.gitignore
+!LICENSE
+!README.md
