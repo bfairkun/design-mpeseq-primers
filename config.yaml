@@ -2,7 +2,7 @@
 InputFiles:
 
   # A stranded bed file of target introns
-  TargetSpliceSites: "/home/bjf79/myhome_yang/MPEseq/NewTargets_eQTLs.bed"
+  TargetSpliceSites: "/home/bjf79/myhome_yang/MPEseq/NewTargets_eQTLs.hg19.bed"
 
   # Reference genome to BLAST candidate primers. A BLAST database will be created (if not already in existence) with the name path/to/genome.fa[.nhr|.nin|.nsq|.fai]
   GenomeFasta: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19.fasta"

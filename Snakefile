@@ -26,6 +26,17 @@ rule FastaIndex:
     shell:
         "samtools index {input}"
 
+rule DetermineLowcomplexityRegions:
+    input:
+        ref = config["InputFiles"]["GenomeFasta"]
+    output:
+        config["OutputPrefix"] + "LowComplexityRegions.sorted.bed"
+    log:
+    shell:
+        """
+        dustmasker -in {input.ref} | awk  'BEGIN {{OFS='\\t'; sequence="" }} {{ if (match($0, ">.*")) {{ gsub(">", "", $0); gsub(" .*", "", $0); sequence=$0 }} else {{ gsub(" - ", "\\t", $0); print sequence "\\t" $1 "\\t" $2+1 }} }}' > {output}
+        """
+
 rule SortTargetSpliceSites:
     input:
         config["InputFiles"]["TargetSpliceSites"]
@@ -154,10 +165,10 @@ rule FilterOutPrimersThatOverlapRepetitiveRegions:
     output:
         config["OutputPrefix"] + "CandidatePrimers.RepeatFiltered.bed"
     params:
-        config["Parameters"]["RepeatRegionMaxPercentOverlap"]
+        float(config["Parameters"]["RepeatRegionMaxPercentOverlap"])/100
     shell:
         """
-        awk -v OFS='\t' '{{split($1, namelist, "::"); split(namelist[3], coord, "_"); print coord[1], coord[2], coord[3], $1, ".", coord[4], $3, $2}}' {input.CandidatePrimers} | bedtools sort -i - -faidx {input.GenomeIndex} | bedtools intersect -a - -b {input.RepeatRegions} -sorted -g {input.GenomeIndex} -f {params} -v > {output}
+        awk -v OFS='\\t' '{{split($1, namelist, "::"); split(namelist[3], coord, "_"); print coord[1], coord[2], coord[3], $1, ".", coord[4], $3, $2}}' {input.CandidatePrimers} | bedtools sort -i - -faidx {input.GenomeIndex} | bedtools intersect -a - -b {input.RepeatRegions} -sorted -g {input.GenomeIndex} -f {params} -v > {output}
         """
 
 rule BlastCandidatePrimers:
@@ -173,7 +184,7 @@ rule BlastCandidatePrimers:
         config["OutputPrefix"] + "CandidatePrimers.blastresults.tab"
     shell:
         """
-        awk -F'\t' '{{print ">"$4"::"$7"\n"$8}}' {input.CandidatePrimers} | blastn -task blastn-short -db {input.fasta} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send btop nident qlen evalue" > {output}
+        awk -F'\\t' '{{print ">"$4"::"$7"\\n"$8}}' {input.CandidatePrimers} | blastn -task blastn-short -db {input.fasta} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send btop nident qlen evalue" > {output}
         """
 
 rule CalculateExpressionOfBlastHits:
@@ -185,7 +196,7 @@ rule CalculateExpressionOfBlastHits:
         config["OutputPrefix"] + "CandidatePrimers.blastresults.counted.tab"
     shell:
         """
-        bedtools sort -faidx {input.GenomeIndex} -i <(awk -F'\t' -v OFS='\t' '$10>$9 {{print $2, $9,$10, ".", ".", "+", $0}} $9>$10 {{print $2, $10,$9, ".", ".", "-", $0}}'  {input.BlastResults}) | bedtools coverage -split -a - -sorted -g {input.GenomeIndex} -b {input.RNASeq} -mean | awk -F'\t' -v OFS='\t' '{{$1=$2=$3=$4=$5=$6=""; print $0}}' > {output}
+        bedtools sort -faidx {input.GenomeIndex} -i <(awk -F'\\t' -v OFS='\\t' '$10>$9 {{print $2, $9,$10, ".", ".", "+", $0}} $9>$10 {{print $2, $10,$9, ".", ".", "-", $0}}'  {input.BlastResults}) | bedtools coverage -split -a - -sorted -g {input.GenomeIndex} -b {input.RNASeq} -mean | awk -F'\\t' -v OFS='\\t' '{{$1=$2=$3=$4=$5=$6=""; print $0}}' > {output}
         """
 
 rule InSilicoPredictionOfOnAndOffTargetCounts:
@@ -199,7 +210,7 @@ rule InSilicoPredictionOfOnAndOffTargetCounts:
         PathToHelperScript = "scripts/EstimateOffTarget_helper.pl"
     shell:
         """
-        cat {input.BlastResultsExpressionCounts} | awk -F'\t' -v OFS='\t' '{{split($7,a,"::"); print a[1]":"a[2]":"a[3]":"a[5]":"a[4],$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}}' |  awk -F'\t' -v OFS='\t' '$8==$13' | sort -k1,1 -k14g,14 | perl {params.PathToHelperScript} | awk -F '\t' -v OFS='\t' '{{print $1, ($15*$19)}}' | awk -F'\t' -v OFS='\t' '{{arr[$1]+=$2}} END {{for (i in arr) {{print i,arr[i]}} }}' | awk -F'\t' -v OFS='\t' '{{split($1,a,":"); split(a[3],b,"_"); print b[1],b[2],b[3],$1,".",b[4], $2}}' | bedtools sort -faidx {input.GenomeIndex} -i - | bedtools coverage -split -a - -sorted -g {input.GenomeIndex} -b  {input.RNASeq} -mean
+        cat {input.BlastResultsExpressionCounts} | awk -F'\\t' -v OFS='\\t' '{{split($7,a,"::"); print a[1]":"a[2]":"a[3]":"a[5]":"a[4],$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21}}' |  awk -F'\\t' -v OFS='\\t' '$8==$13' | sort -k1,1 -k14g,14 | perl {params.PathToHelperScript} | awk -F '\\t' -v OFS='\\t' '{{print $1, ($15*$19)}}' | awk -F'\\t' -v OFS='\\t' '{{arr[$1]+=$2}} END {{for (i in arr) {{print i,arr[i]}} }}' | awk -F'\\t' -v OFS='\\t' '{{split($1,a,":"); split(a[3],b,"_"); print b[1],b[2],b[3],$1,".",b[4], $2}}' | bedtools sort -faidx {input.GenomeIndex} -i - | bedtools coverage -split -a - -sorted -g {input.GenomeIndex} -b  {input.RNASeq} -mean > {output}
         """
 
 rule ScorePrimersAndPickTheBestForEachTarget:
@@ -214,10 +225,11 @@ rule ScorePrimersAndPickTheBestForEachTarget:
         MinTm = config["Parameters"]["TmFilter"]["MinTm"],
         OptimalTm = config["Parameters"]["TmFilter"]["MinTm"],
         MaxTm = config["Parameters"]["TmFilter"]["MaxTm"],
+        MinPercentOnTargetEstimate = config["Parameters"]["MinPercentOnTargetEstimate"],
         Tm_weight = config["Parameters"]["Tm_weight"],
         PercentOnTargetEstimate_weight = config["Parameters"]["PercentOnTargetEstimate_weight"],
         GCcontent_weight = config["Parameters"]["GCcontent_weight"],
     shell:
         """
-        cat {input.PythonPrimerScorerInput} | python PickBestScoringPrimers.py {params} | tee {output.AllPrimersScore} | sort -nrk13,13 | sort -u -k14,14 | awk -F '\t' -v OFS='\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
+        cat {input.PythonPrimerScorerInput} | python scripts/PickBestScoringPrimers.py {params} | tee {output.AllPrimersScore} | sort -k14,14 -k13nr,13 | sort -u -k14,14 | awk -F '\\t' -v OFS='\\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
         """

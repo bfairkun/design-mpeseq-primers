@@ -1,5 +1,6 @@
 # design-mpeseq-primers
 For designing RT primers with blast search, tm constraints, etc
+See `dag.svg` and `config.yaml` to get idea of the basic workflow of primer design.
 
 ## Setup
 
