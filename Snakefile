@@ -96,7 +96,7 @@ if config["InputFiles"]["RNASeq"]:
             GenomeFasta=config["InputFiles"]["GenomeFasta"]
         shell:
             """
-            samtools reheader <(cat <(samtools view -H {input.RNASeqBam} | awk '$0 ~ /^@HD/') <(samtools view -H {input.RNASeqBam} | awk '$0 ~ /^@SQ/ {{split($2,a,":"); print a[2],$0}}' | awk 'FNR == NR {{ lineno[$1] = NR; next}} {{print lineno[$1], $0;}}' {input.GenomeIndex} - | sort -k 1,1n | awk -v OFS='\t' '{{print $3,$4,$5}}' ) <(samtools view -H {input.RNASeqBam} | awk '$0 !~ /^@SQ/ && $0 !~ /^@HD/')) {input.RNASeqBam} | samtools sort > {output}
+            samtools reheader <(cat <(samtools view -H {input.RNASeqBam} | awk '$0 ~ /^@HD/') <(samtools view -H {input.RNASeqBam} | awk '$0 ~ /^@SQ/ {{split($2,a,":"); print a[2],$0}}' | awk 'FNR == NR {{ lineno[$1] = NR; next}} {{print lineno[$1], $0;}}' {input.GenomeIndex} - | sort -k 1,1n | awk -v OFS='\\t' '{{print $3,$4,$5}}' ) <(samtools view -H {input.RNASeqBam} | awk '$0 !~ /^@SQ/ && $0 !~ /^@HD/')) {input.RNASeqBam} | samtools sort > {output}
             """
 else:
     rule MakePseudoRNASeq:
@@ -123,7 +123,7 @@ rule CreateWindowsForCandidatePrimersFromTargetList:
         PathToHelperScript = "scripts/ConstrainTargetsToOverlapSingleExons_helper1.pl"
     shell:
         """
-        cat <(bedtools intersect -sorted -a <(bedtools flank -g {input.GenomeIndex} -l 0 -r {params.WindowSize} -s -i {input.TargetSpliceSites}) -b {input.AnnotatedExons} -g {input.GenomeIndex} -s -wo | perl {params.PathToHelperScript} ) <(bedtools intersect -sorted -a <(bedtools flank -g {input.GenomeIndex} -l 0 -r {params.WindowSize} -s -i {input.TargetSpliceSites}) -b {input.AnnotatedExons} -g {input.GenomeIndex} -s -wa -v) | awk -F '\t' -v OFS='\t' '$6=="+" {{print $1,$2,$3,$4,$5,"-"}} $6=="-" {{print $1,$2,$3,$4,$5,"+"}}' | bedtools sort -i - -faidx {input.GenomeIndex} > {output}
+        cat <(bedtools intersect -sorted -a <(bedtools flank -g {input.GenomeIndex} -l 0 -r {params.WindowSize} -s -i {input.TargetSpliceSites}) -b {input.AnnotatedExons} -g {input.GenomeIndex} -s -wo | perl {params.PathToHelperScript} ) <(bedtools intersect -sorted -a <(bedtools flank -g {input.GenomeIndex} -l 0 -r {params.WindowSize} -s -i {input.TargetSpliceSites}) -b {input.AnnotatedExons} -g {input.GenomeIndex} -s -wa -v) | awk -F '\\t' -v OFS='\\t' '$6=="+" {{print $1,$2,$3,$4,$5,"-"}} $6=="-" {{print $1,$2,$3,$4,$5,"+"}}' | bedtools sort -i - -faidx {input.GenomeIndex} > {output}
         """
 
 rule CreateAllCandidatePrimerSequencesFromWindows:
@@ -182,9 +182,11 @@ rule BlastCandidatePrimers:
         nsq = config["InputFiles"]["GenomeFasta"] + ".nsq"
     output:
         config["OutputPrefix"] + "CandidatePrimers.blastresults.tab"
+    threads:
+        4
     shell:
         """
-        awk -F'\\t' '{{print ">"$4"::"$7"\\n"$8}}' {input.CandidatePrimers} | blastn -task blastn-short -db {input.fasta} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send btop nident qlen evalue" > {output}
+        awk -F'\\t' '{{print ">"$4"::"$7"\\n"$8}}' {input.CandidatePrimers} | blastn -task blastn-short -db {input.fasta} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send btop nident qlen evalue" -num_threads {threads} > {output}
         """
 
 rule CalculateExpressionOfBlastHits:
@@ -220,16 +222,18 @@ rule ScorePrimersAndPickTheBestForEachTarget:
         AllPrimersScore = config["OutputPrefix"] + "CandidatePrimers.scores.tab",
         FinalPrimerList = config["OutputPrefix"] + "FinalPrimerList.tab"
     params:
-        MinPrimerLen = config["Parameters"]["MinPrimerLength"],
-        MaxPrimerLen = config["Parameters"]["MaxPrimerLength"],
+        # MinPrimerLen = config["Parameters"]["MinPrimerLength"],
+        # MaxPrimerLen = config["Parameters"]["MaxPrimerLength"],
         MinTm = config["Parameters"]["TmFilter"]["MinTm"],
-        OptimalTm = config["Parameters"]["TmFilter"]["MinTm"],
+        OptimalTm = config["Parameters"]["TmFilter"]["OptimalTm"],
         MaxTm = config["Parameters"]["TmFilter"]["MaxTm"],
-        MinPercentOnTargetEstimate = config["Parameters"]["MinPercentOnTargetEstimate"],
         Tm_weight = config["Parameters"]["Tm_weight"],
+        MinPercentOnTargetEstimate = config["Parameters"]["MinPercentOnTargetEstimate"],
         PercentOnTargetEstimate_weight = config["Parameters"]["PercentOnTargetEstimate_weight"],
         GCcontent_weight = config["Parameters"]["GCcontent_weight"],
+        MinComplexity = 0.2,
+        Complexity_weight = 0.25
     shell:
         """
-        cat {input.PythonPrimerScorerInput} | python scripts/PickBestScoringPrimers.py {params} | tee {output.AllPrimersScore} | sort -k14,14 -k13nr,13 | sort -u -k14,14 | awk -F '\\t' -v OFS='\\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
+        cat {input.PythonPrimerScorerInput} | python3 scripts/PickBestScoringPrimers.py {params.MinTm} {params.OptimalTm} {params.MaxTm} {params.Tm_weight} {params.MinPercentOnTargetEstimate} {params.PercentOnTargetEstimate_weight} {params.GCcontent_weight} {params.MinComplexity} {params.Complexity_weight} | tee {output.AllPrimersScore} | sort -k14,14 -k13nr,13 | sort -u -k14,14 | awk -F '\\t' -v OFS='\\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
         """

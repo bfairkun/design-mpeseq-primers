@@ -4,6 +4,7 @@
 !dag.svg
 !environment.yaml
 !scripts
+!scripts/*
 !Snakefile
 !.gitignore
 !LICENSE

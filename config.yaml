@@ -2,7 +2,7 @@
 InputFiles:
 
   # A stranded bed file of target introns
-  TargetSpliceSites: "/home/bjf79/myhome_yang/MPEseq/NewTargets_eQTLs.hg19.bed"
+  TargetSpliceSites: "/project2/yangili1/bjf79/2019_MPESeqMiscData/PrimerDesign/201905_MPESeqOriginalTargetList.bed"
 
   # Reference genome to BLAST candidate primers. A BLAST database will be created (if not already in existence) with the name path/to/genome.fa[.nhr|.nin|.nsq|.fai]
   GenomeFasta: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19.fasta"
@@ -15,10 +15,10 @@ InputFiles:
   RepeatRegions: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19_Repeats.bed"
 
   #if no RNA-seq data is provided, will penalize off-target blast-hits according equally, rather than weighting by prevalence in RNA-seq. Note that the bam file provided must have a SortOrder and contig names that match the provided GenomeFasta (chr10 != 10)
-  RNASeq: "/home/bjf79/myhome_yang/MPEseq/LCL_RNAseq/HG00117.1.M_111124_2_renamed.sorted.bam"
+  RNASeq: "/project2/yangili1/bjf79/2019_MPESeqMiscData/LCL_RNAseq/HG00117.1.M_111124_2_renamed.sorted.bam"
 
 # Prepend All output files with /my/path/to/output/files/
-OutputPrefix: "../SnakemakeDesignExtraEQTLPrimersOutput/"
+OutputPrefix: "../201905_SnakemakeDesignPrimersOutput/"
 
 # Define some parameters
 Parameters:
