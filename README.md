@@ -20,7 +20,7 @@ project directory.
 
 1. Create the conda environment "my_PrimerDesign_env" using `environment.yaml`
     ```
-    conda env create --file environment.yaml
+    conda env create --file environment.yaml python=3.6
     ```
 
 1. To use the conda environment, you must first activate it by running `source
