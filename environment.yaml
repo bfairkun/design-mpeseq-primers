@@ -1,34 +1,34 @@
 name: my_PrimerDesign_env
 channels:
   - bioconda
+  - conda-forge
   - defaults
 dependencies:
-  - bedtools=2.27.1=he941832_2
-  - blast=2.6.0=boost1.61_1
-  - dropbox=5.2.1=py36_0
-  - filechunkio=1.6=py36_0
-  - ftputil=3.2=py36_0
-  - libdeflate=1.0=h470a237_0
-  - pysftp=0.2.9=py36_0
-  - samtools=1.9=h8ee4bcc_1
-  - snakemake=3.13.3=py36_0
-  - urllib3=1.12=py36_0
   - asn1crypto=0.24.0=py36_0
   - bcrypt=3.1.5=py36h7b6447c_0
+  - bedtools=2.27.1=he941832_2
   - blas=1.0=mkl
+  - blast=2.6.0=boost1.61_1
   - boost=1.61.0=py36_0
   - bzip2=1.0.6=h14c3975_5
-  - ca-certificates=2018.03.07=0
-  - certifi=2018.11.29=py36_0
+  - ca-certificates=2019.3.9=hecc5488_0
+  - certifi=2019.3.9=py36_0
   - cffi=1.11.5=py36he75722e_1
   - cryptography=2.4.2=py36h1ba5d50_0
   - curl=7.63.0=hbc83047_1000
   - docutils=0.14=py36_0
+  - dropbox=5.2.1=py36_0
+  - filechunkio=1.6=py36_0
+  - ftputil=3.2=py36_0
+  - htslib=1.9=hc238db4_4
   - icu=54.1=0
   - idna=2.8=py36_0
   - intel-openmp=2019.1=144
+  - jellyfish=2.2.10=h2d50403_0
+  - jemalloc=4.5.0=0
   - krb5=1.16.1=h173b8e3_7
   - libcurl=7.63.0=h20c2e04_1000
+  - libdeflate=1.0=h470a237_0
   - libedit=3.1.20170329=h6b74fdf_2
   - libffi=3.2.1=hd88cf55_4
   - libgcc=7.2.0=h69d50b8_2
@@ -43,28 +43,34 @@ dependencies:
   - ncurses=6.1=he6710b0_1
   - numpy=1.15.4=py36h7e9f1db_0
   - numpy-base=1.15.4=py36hde5b4d6_0
-  - openssl=1.1.1a=h7b6447c_0
+  - openssl=1.1.1b=h14c3975_1
   - pandas=0.23.4=py36h04863e7_0
   - paramiko=2.4.2=py36_0
+  - perl=5.26.2=h516909a_1006
   - pip=18.1=py36_0
+  - primer3=2.4.1a=pl526hf484d3e_1
   - psutil=5.4.8=py36h7b6447c_0
   - pyasn1=0.4.4=py36h28b3542_0
   - pycparser=2.19=py36_0
   - pynacl=1.3.0=py36h7b6447c_0
+  - pysftp=0.2.9=py36_0
   - python=3.6.7=h0371630_0
   - python-dateutil=2.7.5=py36_0
   - pytz=2018.7=py36_0
   - pyyaml=3.13=py36h14c3975_0
   - readline=7.0=h7b6447c_5
   - requests=2.14.2=py36_0
+  - samtools=1.9=h8ee4bcc_1
   - setuptools=40.6.3=py36_0
   - six=1.12.0=py36_0
+  - snakemake=3.13.3=py36_0
   - sqlite=3.26.0=h7b6447c_0
   - tk=8.6.8=hbc83047_0
+  - urllib3=1.12=py36_0
   - wheel=0.32.3=py36_0
   - wrapt=1.10.11=py36h14c3975_2
   - xz=5.2.4=h14c3975_4
   - yaml=0.1.7=had09818_2
   - zlib=1.2.11=h7b6447c_3
-prefix: /home/bjf79/.conda/envs/my_PrimerDesign_env
+prefix: /project/gilad/bjf79/envs/my_PrimerDesign_env
 
