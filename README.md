@@ -17,6 +17,9 @@ project directory.
 1. Download and install Miniconda ([instructions](https://conda.io/miniconda.html))
 
 1. Clone this repository (or your personal fork) using `git clone`
+    ```
+    git clone https://github.com/bfairkun/design-mpeseq-primers.git
+    ```
 
 1. Create the conda environment "my_PrimerDesign_env" using `environment.yaml`
     ```
