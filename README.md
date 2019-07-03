@@ -21,16 +21,16 @@ project directory.
     git clone https://github.com/bfairkun/design-mpeseq-primers.git
     ```
 
-1. Create the conda environment "my_PrimerDesign_env" using `environment.yaml`
+1. Create the conda environment "mpe-seq-primer-design" using `environment.yaml`
     ```
-    conda env create --file environment.yaml python=3.6
+    conda env create --file environment.yaml
     ```
 
-1. To use the conda environment, you must first activate it by running `source
-activate my_PrimerDesign_env`. This will override your default settings for Python, and
+1. To use the conda environment, you must first activate it by running `conda
+activate mpe-seq-primer-design`. This will override your default settings for Python, and
 various other software packages. When you are done working on this project, you
 can either logout of the current session or deactivate the environment by
-running `source deactivate`.
+running `conda deactivate`.
 
 1. edit config and set parameters as needed
 ```
