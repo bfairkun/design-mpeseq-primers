@@ -2,7 +2,7 @@
 InputFiles:
 
   # A stranded bed file of target introns
-  TargetSpliceSites: "/project2/yangili1/bjf79/2019_MPESeqMiscData/PrimerDesign/201905_MPESeqOriginalTargetList.bed"
+  TargetSpliceSites: "/project2/yangili1/shanewarland/splicesiteprimer/UpdatedSpliceSitesPosCon.bed"
 
   # Reference genome to BLAST candidate primers. A BLAST database will be created (if not already in existence) with the name path/to/genome.fa[.nhr|.nin|.nsq|.fai]
   GenomeFasta: "/home/bjf79/myhome_yang/GTEx_Analysis_V7/Reference/Homo_sapiens_assembly19.fasta"
@@ -18,19 +18,19 @@ InputFiles:
   RNASeq: "/project2/yangili1/bjf79/2019_MPESeqMiscData/LCL_RNAseq/HG00117.1.M_111124_2_renamed.sorted.bam"
 
 # Prepend All output files with /my/path/to/output/files/
-OutputPrefix: "../201905_SnakemakeDesignPrimersOutput/"
+OutputPrefix: "../201906_SnakemakeDesignPrimersOutput/"
 
 # Define some parameters
 Parameters:
 
   # window size (bp) for potential primers downstream of 3'ss
-  WindowSize: 50
+  WindowSize: 31
 
   # Hard filters. Candidate Primers that do not conform to Min or Max parameters are discarded, even if that means discarding all potential primers for a target
 
   # Primer length
   MinPrimerLength: 24
-  MaxPrimerLength: 32
+  MaxPrimerLength: 30
 
   # Candidate primers that are over this percent within a RepeatRegion will be discarded
   RepeatRegionMaxPercentOverlap: 50

@@ -237,5 +237,5 @@ rule ScorePrimersAndPickTheBestForEachTarget:
         Complexity_weight = 0.25
     shell:
         """
-        cat {input.PythonPrimerScorerInput} | python3 scripts/PickBestScoringPrimers.py {params.MinTm} {params.OptimalTm} {params.MaxTm} {params.Tm_weight} {params.MinPercentOnTargetEstimate} {params.PercentOnTargetEstimate_weight} {params.GCcontent_weight} {params.MinComplexity} {params.Complexity_weight} | tee {output.AllPrimersScore} | sort -k14,14 -k13nr,13 | sort -u -k14,14 | awk -F '\\t' -v OFS='\\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
+        cat {input.PythonPrimerScorerInput} | python3 scripts/PickBestScoringPrimers.py {params.MinTm} {params.OptimalTm} {params.MaxTm} {params.Tm_weight} {params.MinPercentOnTargetEstimate} {params.PercentOnTargetEstimate_weight} {params.GCcontent_weight} {params.MinComplexity} {params.Complexity_weight} | tee {output.AllPrimersScore} | sort -k15,15 -k14nr,14 | sort -u -k15,15 | awk -F '\\t' -v OFS='\\t' '{{split($4,a,":"); print $0, a[5]}}' > {output.FinalPrimerList}
         """
